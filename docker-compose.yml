@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  api:
+    build: ./python-flask-app
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/user_management
+      - SECRET_KEY=AZ9IFxR1OhWk4QksexFe2Chdwv7Eaiebv9z35LLlBVY
+      - GOOGLE_CLIENT_ID=63638963583-mjk1svtfoq5fi196divoc88jbqea45ai.apps.googleusercontent.com
+      - GOOGLE_CLIENT_SECRET=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
+      - FACEBOOK_APP_ID=1169934434131676
+      - FACEBOOK_APP_SECRET='693fc00815ca6dff2be62e8b9b9ef4ae'
+      - FRONTEND_URL=http://localhost:3000
+      - BACKEND_URL=http://localhost:5000
+    depends_on:
+      - mongo
+
+  frontend:
+    build: ./nextjs-starter-app
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:5000/api
+    depends_on:
+      - api
+
+  mongo:
+    image: mongo:4.4
+    ports:
+      - "27018:27017"  # Changed to 27018 on the host
+    volumes:
+      - mongo-data:/data/db
+
+  mongo-express:
+    image: mongo-express
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: password
+    depends_on:
+      - mongo
+
+volumes:
+  mongo-data:
